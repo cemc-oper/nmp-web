@@ -1,0 +1,94 @@
+.page_title {
+    text-align: center;
+}
+
+.button_sp_area {
+    padding:10px 0;
+    width:60%;
+    margin:0 auto;
+    text-align:justify;
+    text-justify:distribute-all-lines;
+    font-size:0
+}
+
+.container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+/* aborted task */
+.aborted-task-row{
+    display:flex;
+    display: -webkit-flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.aborted-task-cell-status{
+    flex-basis: 40px;
+    min-width: 40px;
+}
+.aborted-task-cell-path{
+    margin-left: 5px;
+    margin-right: 5px;
+    flex:1;
+}
+
+.aborted-task-cell-path-text{
+    /*flex:1;*/
+}
+
+/* disk-usage 布局 */
+
+.disk-usage-box {
+    display: flex;
+    display: -webkit-flex;
+    flex-wrap: wrap;
+}
+
+.disk-usage-row {
+    flex-basis: 100%;
+    display: flex;
+    display: -webkit-flex;
+}
+
+.disk-usage-cell {
+    flex: 0 0 33.3333%;
+}
+
+/* loadleveler status */
+.loadleveler-status-row{
+    flex-basis: 100%;
+    display:flex;
+    display: -webkit-flex;
+    flex-wrap: wrap;
+}
+
+.loadleveler-status-cell-status{
+    flex-basis: 10%;
+}
+
+.loadleveler-status-cell-owner{
+    flex-basis: 30%;
+}
+
+.loadleveler-status-cell-class{
+    flex-basis: 30%;
+}
+
+.loadleveler-status-cell-queue-date{
+    flex-basis: 30%;
+    text-align: end;
+}
+
+.loadleveler-status-header-button{
+    border: 1px solid gray;
+    display: flex;
+    display: -webkit-flex;
+    /*margin-left:3px;*/
+    /*margin-right:3px;*/
+}
+
+

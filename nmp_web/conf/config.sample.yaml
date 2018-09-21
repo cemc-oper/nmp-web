@@ -1,0 +1,46 @@
+nwpc_monitor_web:
+  secret:
+    key: secret key for flask
+
+  debug:
+    flask_debug: on or off
+
+  host:
+    ip: ip address
+    port: port number
+
+  secret_key: secret key for flask
+
+  mysql:
+    host:
+      ip: ip address
+      port: port number
+    user: user
+    password: password
+    database: database name
+    charset: charset
+    pool_recycle: number
+
+  mongodb:
+    host:
+      ip: ip address
+      port: port number
+
+  redis:
+    host:
+      ip: ip address
+      port: port number
+
+  analytics:
+    google_analytics:
+      enable: on or off
+      url: http://www.google-analytics.com/collect
+      version: 1
+      track_id: track_id
+      document_host: document_host
+
+  weixin_app:
+    token:
+      corp_id: corp_id
+      corp_secret: corp_secret
+      url: https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={corp_secret}
