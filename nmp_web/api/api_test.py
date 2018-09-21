@@ -1,5 +1,7 @@
-from flask import request, jsonify, json
+# coding: utf-8
 import gzip
+from flask import request, jsonify, json
+
 from nmp_web.api import api_app
 
 

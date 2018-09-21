@@ -1,27 +1,31 @@
 # coding=utf-8
-import redis
+from pathlib import Path
+
 from flask import Flask
-from pymongo import MongoClient
 
-from nmp_web.util.converter import NoStaticConverter
-from nmp_web.util.json_encoder import NwpcMonitorWebApiJSONEncoder
-from nmp_web.app_config import load_config
+from .util.converter import NoStaticConverter
+from .util.json_encoder import NwpcMonitorWebApiJSONEncoder
+from .app_config import load_config
 
-app = Flask(__name__, static_url_path='/static', static_folder='../static')
 
-app.config.from_object(load_config())
-redis_host = app.config['NWPC_MONITOR_WEB_CONFIG']['redis']['host']['ip']
-redis_port = app.config['NWPC_MONITOR_WEB_CONFIG']['redis']['host']['port']
-redis_client = redis.StrictRedis(host=redis_host, port=redis_port)
+def create_app(config_file_path=None):
+    static_folder = str(Path(Path(__file__).parent.parent, "static"))
+    template_folder = str(Path(Path(__file__).parent.parent, "templates"))
+    app = Flask(__name__,
+                static_folder=static_folder,
+                template_folder=template_folder)
 
-mongodb_client = MongoClient(app.config['NWPC_MONITOR_WEB_CONFIG']['mongodb']['host']['ip'],
-                             app.config['NWPC_MONITOR_WEB_CONFIG']['mongodb']['host']['port'])
+    app.config.from_object(load_config(config_file_path))
+    app.secret_key = '\x99g\x0b\xedY\xcf\n\xdd\xeb\xd7\\2K\xf94Cq{\xea\xe6\x8c\x17\xdf\x10'
 
-app.json_encoder = NwpcMonitorWebApiJSONEncoder
-app.url_map.converters['no_static'] = NoStaticConverter
+    app.json_encoder = NwpcMonitorWebApiJSONEncoder
+    app.url_map.converters['no_static'] = NoStaticConverter
 
-app.secret_key = '\x99g\x0b\xedY\xcf\n\xdd\xeb\xd7\\2K\xf94Cq{\xea\xe6\x8c\x17\xdf\x10'
+    with app.app_context():
+        import nmp_web.common.database
+        import nmp_web.controller
 
-from nmp_web.api import api_app
-app.register_blueprint(api_app, url_prefix="/api/v1")
+        from nmp_web.api import api_app
+        app.register_blueprint(api_app, url_prefix="/api/v1")
 
+    return app

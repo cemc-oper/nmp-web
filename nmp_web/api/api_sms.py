@@ -2,13 +2,13 @@ import datetime
 import gzip
 
 import requests
-from flask import request, json, jsonify, url_for
+from flask import request, json, jsonify, url_for, current_app
 from nwpc_workflow_model.visitor import SubTreeNodeVisitor, pre_order_travel_dict
 
-from nmp_web import app, redis_client, mongodb_client
+from nmp_web.common.database import redis_client, mongodb_client
 from nmp_web.api import api_app
 from nmp_web.common import analytics
-from nmp_web.common import owner_list, get_owner_repo_status_from_cache
+from nmp_web.common.operation_system import owner_list, get_owner_repo_status_from_cache
 
 # mongodb
 nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop
@@ -152,7 +152,7 @@ def get_sms_status(owner, repo):
     message['status'] = bunch_dict
 
     # send data to google analytics
-    google_analytics_config = app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
+    google_analytics_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
     if google_analytics_config['enable'] is True:
         post_data = {
             'v': google_analytics_config['version'],

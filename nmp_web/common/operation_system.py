@@ -1,5 +1,8 @@
+# coding: utf-8
+
 from flask import json
-from nmp_web import redis_client, mongodb_client
+
+from nmp_web.common.database import redis_client, mongodb_client
 
 nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop
 sms_server_status = nwpc_monitor_platform_mongodb.sms_server_status

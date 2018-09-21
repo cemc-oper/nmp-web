@@ -1,7 +1,6 @@
 # coding=utf-8
-from flask import session
+from flask import session, current_app
 
-from nmp_web import app
 from nmp_web.common import weixin
 
 
@@ -25,7 +24,7 @@ def get_user_info(code):
     if code is None:
         return None
     weixin_client = weixin.WeixinApp(
-        weixin_config=app.config['NWPC_MONITOR_WEB_CONFIG']['weixin_app']
+        weixin_config=current_app.config['NWPC_MONITOR_WEB_CONFIG']['weixin_app']
     )
     user_info = weixin_client.get_user_info(code)
     if user_info['errcode'] == 0:

@@ -1,4 +1,6 @@
-from nmp_web import mongodb_client
+# coding: utf-8
+
+from nmp_web.common.database import mongodb_client
 
 # mongodb
 nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop

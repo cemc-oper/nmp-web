@@ -2,7 +2,7 @@ import gzip
 
 from flask import request, json, jsonify, url_for
 
-from nmp_web import mongodb_client
+from nmp_web.common.database import mongodb_client
 from nmp_web.api import api_app
 from nmp_web.common import analytics
 from nmp_web.common import data_store

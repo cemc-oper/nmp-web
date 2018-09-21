@@ -54,20 +54,20 @@ class Config(object):
                 self.SQLALCHEMY_POOL_RECYCLE = pool_recycle
 
 
-def load_config():
-    config_file_name = "production.config.yaml"
-    if 'MODE' in os.environ:
-        mode = os.environ['MODE']
-        if mode == 'production':
-            config_file_name = "production.config.yaml"
-        elif mode == 'develop':
-            config_file_name = "develop.config.yaml"
-        else:
-            config_file_name = mode + ".config.yaml"
-
-    config_file_directory = os.path.dirname(__file__) + "/conf"
-
-    config_file_path = config_file_directory + "/" + config_file_name
+def load_config(config_file_path):
+    # config_file_name = "production.config.yaml"
+    # if 'MODE' in os.environ:
+    #     mode = os.environ['MODE']
+    #     if mode == 'production':
+    #         config_file_name = "production.config.yaml"
+    #     elif mode == 'develop':
+    #         config_file_name = "develop.config.yaml"
+    #     else:
+    #         config_file_name = mode + ".config.yaml"
+    #
+    # config_file_directory = os.path.dirname(__file__) + "/conf"
+    #
+    # config_file_path = config_file_directory + "/" + config_file_name
 
     print("config file path:", config_file_path)
 

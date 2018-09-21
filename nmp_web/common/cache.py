@@ -1,6 +1,7 @@
+# coding: utf-8
 from flask import json
 
-from nmp_web import redis_client
+from nmp_web.common.database import redis_client
 
 weixin_access_token_key = "weixin_access_token"
 

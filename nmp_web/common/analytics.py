@@ -2,14 +2,14 @@
 import uuid
 import requests
 
-from nmp_web import app
+from flask import current_app
 
 
 REQUEST_POST_TIME_OUT = 20
 
 
 def send_google_analytics_page_view(page_url):
-    google_analytics_config = app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
+    google_analytics_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
     if google_analytics_config['enable'] is True:
         print('send data to google analytics')
         post_data = {
