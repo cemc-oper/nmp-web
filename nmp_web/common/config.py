@@ -1,8 +1,4 @@
-"""
-config.py
-
-use environment var
-"""
+# coding: ut-8
 import os
 import yaml
 

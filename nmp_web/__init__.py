@@ -5,7 +5,7 @@ from flask import Flask
 
 from .util.converter import NoStaticConverter
 from .util.json_encoder import NwpcMonitorWebApiJSONEncoder
-from .app_config import load_config
+from nmp_web.common.config import load_config
 
 
 def create_app(config_file_path=None):
