@@ -1,9 +1,7 @@
-from nmp_web import app as application
+# coding: utf-8
 
-
-def create_app():
-    return application
-
+from nmp_web import create_app
+application = create_app()
 
 if __name__ == "main":
     application.run()

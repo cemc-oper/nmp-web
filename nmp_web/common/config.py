@@ -51,19 +51,11 @@ class Config(object):
 
 
 def load_config(config_file_path):
-    # config_file_name = "production.config.yaml"
-    # if 'MODE' in os.environ:
-    #     mode = os.environ['MODE']
-    #     if mode == 'production':
-    #         config_file_name = "production.config.yaml"
-    #     elif mode == 'develop':
-    #         config_file_name = "develop.config.yaml"
-    #     else:
-    #         config_file_name = mode + ".config.yaml"
-    #
-    # config_file_directory = os.path.dirname(__file__) + "/conf"
-    #
-    # config_file_path = config_file_directory + "/" + config_file_name
+    if config_file_path is None:
+        if 'NMP_WEB_CONFIG' in os.environ:
+            config_file_path = os.environ['NMP_WEB_CONFIG']
+        else:
+            raise Exception('config file path or NMP_WEB_CONFIG must be set.')
 
     print("config file path:", config_file_path)
 
