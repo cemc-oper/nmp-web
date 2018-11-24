@@ -101,6 +101,46 @@ def post_sms_status(owner, repo):
 
         commits_collection = nwpc_monitor_platform_mongodb.commits
         commits_collection.insert_one(commit_object)
+    elif message['data']['type'] == 'nmp_model':
+        status_blob = None
+        aborted_blob = None
+        for a_blob in message['data']['blobs']:
+            if a_blob['_cls'] == 'Blob.StatusBlob':
+                status_blob = a_blob
+            if a_blob['_cls'] == 'Blob.AbortedTasksBlob':
+                aborted_blob = a_blob
+        if status_blob is None:
+            result = {
+                'status': 'error',
+                'message': 'can\'t find a status blob.'
+            }
+            return jsonify(result)
+
+        tree_object = message['data']['trees'][0]
+        commit_object = message['data']['commits'][0]
+
+        # 保存到本地缓存
+        redis_value = {
+            'owner': owner,
+            'repo': repo,
+            'sms_name': repo,
+            'time': status_blob['data']['content']['collected_time'],
+            'status': status_blob['data']['content']['status'],
+            'type': 'sms'
+        }
+        redis_client.set(key, json.dumps(redis_value))
+
+        # 保存到 mongodb
+        blobs_collection = nwpc_monitor_platform_mongodb.blobs
+        blobs_collection.insert_one(status_blob)
+        if aborted_blob:
+            blobs_collection.insert_one(aborted_blob)
+
+        trees_collection = nwpc_monitor_platform_mongodb.trees
+        trees_collection.insert_one(tree_object)
+
+        commits_collection = nwpc_monitor_platform_mongodb.commits
+        commits_collection.insert_one(commit_object)
 
     # send data to google analytics
     analytics.send_google_analytics_page_view(
