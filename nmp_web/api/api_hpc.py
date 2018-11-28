@@ -1,6 +1,6 @@
 import gzip
 
-from flask import request, json, jsonify, url_for
+from flask import request, json, jsonify, url_for, current_app
 
 from nmp_web.common.database import mongodb_client
 from nmp_web.api import api_app
@@ -134,6 +134,12 @@ def receive_loadleveler_status(user):
 
         commits_collection = nwpc_monitor_platform_mongodb.commits
         commits_collection.insert_one(commit_object)
+    elif message['data']['type'] == 'nmp_model':
+        # TODO: nmp_model
+        current_app.logger.warn("message type is not supported: nmp_model".format())
+    elif message['data']['type'] == 'nmp_model_job_list':
+        # TODO: nmp_model
+        current_app.logger.warn("message type is not supported: nmp_model_job_list".format())
     elif message['data']['type'] == 'job_list':
         value = message
         data_store.save_hpc_loadleveler_status_to_cache(user, value)
