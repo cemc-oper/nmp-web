@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='nmp-web',
 
-    version='4.0',
+    version='4.0.0',
 
     description='A website on cloud for NWPC monitor platform.',
     long_description=__doc__,
