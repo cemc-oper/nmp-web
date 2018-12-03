@@ -14,6 +14,12 @@ from nmp_web.common.operation_system import owner_list, get_owner_repo_status_fr
 nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop
 sms_server_status = nwpc_monitor_platform_mongodb.sms_server_status
 
+try:
+    a = datetime.datetime.fromisoformat
+except AttributeError:
+    from backports.datetime_fromisoformat import MonkeyPatch
+    MonkeyPatch.patch_fromisoformat()
+
 
 @api_app.route('/repos/<owner>/<repo>/sms/status', methods=['POST'])
 def post_sms_status(owner, repo):
@@ -230,7 +236,7 @@ def get_owner_repos(owner: str):
 
             repo_status = bunch_dict['status']
             time_string = cache_value['time']
-            data_collect_datetime = datetime.datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%S.%f")
+            data_collect_datetime = datetime.datetime.fromisoformat(time_string)
             last_updated_time = data_collect_datetime.strftime('%Y-%m-%d %H:%M:%S')
         owner_repo_status.append({
             'owner': owner,
