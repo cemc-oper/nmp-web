@@ -45,7 +45,7 @@ LoadlevelerAbnormalJobDetailView.propTypes = {
 
 function mapStateToProps(state, ownProps){
     return {
-        job_list: state.hpc.loadleveler_status.abnormal_jobs.job_list,
+        job_list: state.hpc.loadleveler_status.abnormal_jobs.abnormal_jobs,
         update_time: state.hpc.loadleveler_status.abnormal_jobs.update_time
     }
 }

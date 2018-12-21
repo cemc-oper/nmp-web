@@ -135,8 +135,30 @@ def receive_loadleveler_status(user):
         commits_collection = nwpc_monitor_platform_mongodb.commits
         commits_collection.insert_one(commit_object)
     elif message['data']['type'] == 'nmp_model':
-        # TODO: nmp_model
-        current_app.logger.warn("message type is not supported: nmp_model".format())
+        abnormal_jobs_blob = None
+        for a_blob in message['data']['blobs']:
+            if a_blob['data']['_cls'] == 'AbnormalJobsBlobData':
+                abnormal_jobs_blob = a_blob
+
+        if abnormal_jobs_blob is None:
+            result = {
+                'status': 'error',
+                'message': 'can\'t find a abnormal jobs blob.'
+            }
+            return jsonify(result)
+
+        tree_object = message['data']['trees'][0]
+        commit_object = message['data']['commits'][0]
+
+        # 保存到 mongodb
+        blobs_collection = nwpc_monitor_platform_mongodb.blobs
+        blobs_collection.insert_one(abnormal_jobs_blob)
+
+        trees_collection = nwpc_monitor_platform_mongodb.trees
+        trees_collection.insert_one(tree_object)
+
+        commits_collection = nwpc_monitor_platform_mongodb.commits
+        commits_collection.insert_one(commit_object)
     elif message['data']['type'] == 'nmp_model_job_list':
         # TODO: nmp_model
         current_app.logger.warn("message type is not supported: nmp_model_job_list".format())
@@ -165,26 +187,25 @@ def request_loadleveler_status(user):
 def get_hpc_loadleveler_status_abnormal_jobs(user, abnormal_jobs_id):
     abnormal_jobs_content = {
         'update_time': None,
-        'plugin_name': None,
-        'abnormal_job_list': [],
+        'plugins': None,
+        'abnormal_jobs': [],
         'abnormal_jobs_id': abnormal_jobs_id
     }
 
     blobs_collection = nwpc_monitor_platform_mongodb.blobs
     query_key = {
-        'owner': user,
-        'repo': 'hpc',
-        'id': abnormal_jobs_id
+        'ticket_id': abnormal_jobs_id
     }
     query_result = blobs_collection.find_one(query_key)
     if not query_result:
         return jsonify(abnormal_jobs_content)
 
-    blob_content = query_result['data']['content']
+    blob_data = query_result['data']
+    blob_content = blob_data['content']
 
-    abnormal_jobs_content['update_time'] = blob_content['update_time']
-    abnormal_jobs_content['plugin_name'] = blob_content['update_time']
-    abnormal_jobs_content['abnormal_job_list'] = blob_content['abnormal_job_list']
+    abnormal_jobs_content['update_time'] = blob_data['update_time']
+    abnormal_jobs_content['plugins'] = blob_content['plugins']
+    abnormal_jobs_content['abnormal_jobs'] = blob_content['abnormal_jobs']
     abnormal_jobs_content['abnormal_jobs_id'] = abnormal_jobs_id
 
     return jsonify(abnormal_jobs_content)

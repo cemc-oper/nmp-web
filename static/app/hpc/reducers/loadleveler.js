@@ -19,8 +19,8 @@ export function loadleveler_status_reducer(state={
         abnormal_jobs: {
             update_time: null,
             abnormal_jobs_id: null,
-            plugin_name: null,
-            job_list: []
+            plugin: null,
+            abnormal_jobs: []
         },
         show_option: {
             type: 'BRIEF'
@@ -59,9 +59,9 @@ export function loadleveler_status_reducer(state={
             data = action.response.data;
             let abnormal_jobs = {
                 update_time: data['update_time'],
-                plugin_name: data['plugin_name'],
+                plugin: data['plugin'],
                 abnormal_jobs_id: data['abnormal_jobs_id'],
-                job_list: data['abnormal_job_list']
+                abnormal_jobs: data['abnormal_jobs']
             };
 
             // return Object.assign({}, state, {
