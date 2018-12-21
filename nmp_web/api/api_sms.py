@@ -368,7 +368,7 @@ def get_repo_aborted_tasks(owner, repo, aborted_id):
     query_key = {
         'owner': owner,
         'repo': repo,
-        'id': aborted_id
+        'ticket_id': aborted_id
     }
     query_result = blobs_collection.find_one(query_key)
     if not query_result:
@@ -377,7 +377,7 @@ def get_repo_aborted_tasks(owner, repo, aborted_id):
     blob_content = query_result['data']['content']
 
     aborted_tasks_content = {
-        'update_time': blob_content['update_time'],
+        'update_time': query_result['timestamp'],
         'collected_time': blob_content['collected_time'],
         'status_blob_id': blob_content['status_blob_ticket_id'],
         'tasks': blob_content['tasks']
@@ -460,7 +460,7 @@ def get_repo_unfit_nodes(owner, repo, unfit_nodes_id):
     query_key = {
         'owner': owner,
         'repo': repo,
-        'id': unfit_nodes_id
+        'ticket_id': unfit_nodes_id
     }
     query_result = blobs_collection.find_one(query_key)
     if not query_result:
