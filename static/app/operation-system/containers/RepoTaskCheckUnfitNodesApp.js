@@ -35,9 +35,9 @@ class RepoTaskCheckUnfitNodesApp extends Component{
 
         let repo_last_update_time = '未知';
         let cur_time = TimeUtil.getUTCNow();
-        if(unfit_nodes['update_time']!==null) {
+        if(unfit_nodes['check_time']!==null) {
             repo_last_update_time = TimeUtil.getDelayTime(
-                TimeUtil.parseUtcIsoTimeString(unfit_nodes['update_time']), cur_time);
+                TimeUtil.parseUtcIsoTimeString(unfit_nodes['check_time']), cur_time);
         }
 
         let image_style = {
@@ -45,10 +45,10 @@ class RepoTaskCheckUnfitNodesApp extends Component{
             marginRight: '5px'
         };
 
-        let task_nodes = unfit_nodes['unfit_node_list'].map(function(a_node, i){
-            let unfit_check_list_node = a_node['unfit_check_list'].map(function(an_unfit_check, i) {
-                if(an_unfit_check['type'] === 'status' ){
-                    let expected_value = an_unfit_check['value']['expected_value'];
+        let task_nodes = unfit_nodes['unfit_nodes'].map(function(a_node, i){
+            let unfit_check_list_node = a_node['check_results'].map(function(an_unfit_check, i) {
+                if(an_unfit_check['_cls'] === 'StatusCheckResult' ){
+                    let expected_value = an_unfit_check['expected_value'];
 
                     let expected_value_node = (<div/>);
                     if(expected_value['operator'] === "in"){
@@ -64,7 +64,7 @@ class RepoTaskCheckUnfitNodesApp extends Component{
                             </div>
                             <div className="weui-flex__item">
                                 <div className="placeholder">
-                                    <NodeStatusImage node_status={ an_unfit_check['value']['value'] } image_style={ image_style } />
+                                    <NodeStatusImage node_status={ an_unfit_check['value'] } image_style={ image_style } />
                                 </div>
                             </div>
                             <div className="weui-flex__item">
@@ -74,17 +74,17 @@ class RepoTaskCheckUnfitNodesApp extends Component{
                             </div>
                         </div>
                     )
-                } else if (an_unfit_check['type'] === 'variable') {
+                } else if (an_unfit_check['_cls'] === 'VariableCheckResult') {
                     return (
                         <div className="weui-flex">
                             <div className="weui-flex__item">
-                                <div className="placeholder">{an_unfit_check['name']}</div>
+                                <div className="placeholder">{an_unfit_check['variable_name']}</div>
                             </div>
                             <div className="weui-flex__item">
-                                <div className="placeholder">{an_unfit_check['value']['value']}</div>
+                                <div className="placeholder">{an_unfit_check['value']}</div>
                             </div>
                             <div className="weui-flex__item">
-                                <div className="placeholder">{an_unfit_check['value']['expected_value']}</div>
+                                <div className="placeholder">{an_unfit_check['expected_value']}</div>
                             </div>
                         </div>
                     )
@@ -144,9 +144,9 @@ RepoTaskCheckUnfitNodesApp.propTypes = {
     unfit_nodes: PropTypes.shape({
         collected_time: PropTypes.string,
         status_blob_id: PropTypes.number,
-        unfit_node_list: PropTypes.arrayOf(PropTypes.shape({
+        unfit_nodes: PropTypes.arrayOf(PropTypes.shape({
             node_path: PropTypes.string,
-            unfit_node_list: PropTypes.array
+            check_results: PropTypes.array
         })),
         name: PropTypes.string,
         trigger: PropTypes.array,
