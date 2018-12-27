@@ -1,10 +1,11 @@
 # coding=utf-8
 from pathlib import Path
+import logging
 
 from flask import Flask
 
-from .util.converter import NoStaticConverter
-from .util.json_encoder import NwpcMonitorWebApiJSONEncoder
+from nmp_web.util.converter import NoStaticConverter
+from nmp_web.util.json_encoder import NwpcMonitorWebApiJSONEncoder
 from nmp_web.common.config import load_config
 
 
@@ -20,6 +21,7 @@ def create_app(config_file_path=None):
 
     app.json_encoder = NwpcMonitorWebApiJSONEncoder
     app.url_map.converters['no_static'] = NoStaticConverter
+    app.logger.setLevel(logging.DEBUG)
 
     with app.app_context():
         import nmp_web.common.database

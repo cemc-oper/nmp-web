@@ -1,3 +1,4 @@
+# coding: utf-8
 import datetime
 import gzip
 
@@ -126,6 +127,9 @@ def post_sms_status(owner, repo):
         commit_object = message['data']['commits'][0]
 
         # 保存到本地缓存
+        print('[{owner}/{repo}] save status to redis...'.format(
+            owner=owner, repo=repo
+        ))
         redis_value = {
             'owner': owner,
             'repo': repo,
@@ -137,9 +141,15 @@ def post_sms_status(owner, repo):
         redis_client.set(key, json.dumps(redis_value))
 
         # 保存到 mongodb
+        print('[{owner}/{repo}] save status blob to mongo...'.format(
+            owner=owner, repo=repo
+        ))
         blobs_collection = nwpc_monitor_platform_mongodb.blobs
         blobs_collection.insert_one(status_blob)
         if aborted_blob:
+            current_app.logger.info('[{owner}/{repo}] save aborted blob to mongo...'.format(
+                owner=owner, repo=repo
+            ))
             blobs_collection.insert_one(aborted_blob)
 
         trees_collection = nwpc_monitor_platform_mongodb.trees
