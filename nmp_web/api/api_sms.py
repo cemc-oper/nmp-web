@@ -123,17 +123,17 @@ def post_sms_status(owner, repo):
                 status_blob = a_blob
             if a_blob['_cls'] == 'Blob.AbortedTasksBlob':
                 aborted_blob = a_blob
-        if status_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a status blob.'
-            }
-            return jsonify(result)
+        # if status_blob is None:
+        #     result = {
+        #         'status': 'error',
+        #         'message': 'can\'t find a status blob.'
+        #     }
+        #     return jsonify(result)
 
         tree_object = message['data']['trees'][0]
         commit_object = message['data']['commits'][0]
 
-        # 保存到本地缓存
+        # save to redis
         current_app.logger.info('[{owner}/{repo}] save status to redis...'.format(
             owner=owner, repo=repo
         ))
@@ -147,12 +147,13 @@ def post_sms_status(owner, repo):
         }
         redis_client.set(key, json.dumps(redis_value))
 
-        # 保存到 mongodb
+        # save to mongodb
+        # NOTE: ignore status blob to speed up.
         current_app.logger.info('[{owner}/{repo}] save status blob to mongo...'.format(
             owner=owner, repo=repo
         ))
         blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(status_blob)
+        # blobs_collection.insert_one(status_blob)
         if aborted_blob:
             current_app.logger.info('[{owner}/{repo}] save aborted blob to mongo...'.format(
                 owner=owner, repo=repo
