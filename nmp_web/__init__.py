@@ -21,6 +21,9 @@ def create_app(config_file_path=None):
 
     app.json_encoder = NwpcMonitorWebApiJSONEncoder
     app.url_map.converters['no_static'] = NoStaticConverter
+
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(logging.DEBUG)
 
     with app.app_context():

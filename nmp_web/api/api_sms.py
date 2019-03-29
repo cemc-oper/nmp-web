@@ -41,6 +41,12 @@ def post_sms_status(owner, repo):
 
     key = "{owner}/{repo}/status".format(owner=owner, repo=repo)
 
+    current_app.logger.info("[{owner}/{repo}]data type: {data_type}".format(
+        owner=owner,
+        repo=repo,
+        data_type=message['data']['type'],
+    ))
+
     if message['data']['type'] == 'status':
         redis_value = message['data']
 
@@ -76,6 +82,7 @@ def post_sms_status(owner, repo):
                 status_blob = a_blob
             if a_blob['data']['type'] == 'aborted_tasks':
                 aborted_blob = a_blob
+
         if status_blob is None:
             result = {
                 'status': 'error',
@@ -127,7 +134,7 @@ def post_sms_status(owner, repo):
         commit_object = message['data']['commits'][0]
 
         # 保存到本地缓存
-        print('[{owner}/{repo}] save status to redis...'.format(
+        current_app.logger.info('[{owner}/{repo}] save status to redis...'.format(
             owner=owner, repo=repo
         ))
         redis_value = {
@@ -141,7 +148,7 @@ def post_sms_status(owner, repo):
         redis_client.set(key, json.dumps(redis_value))
 
         # 保存到 mongodb
-        print('[{owner}/{repo}] save status blob to mongo...'.format(
+        current_app.logger.info('[{owner}/{repo}] save status blob to mongo...'.format(
             owner=owner, repo=repo
         ))
         blobs_collection = nwpc_monitor_platform_mongodb.blobs
@@ -171,7 +178,6 @@ def post_sms_status(owner, repo):
 
 @api_app.route('/repos/<owner>/<repo>/sms/status', methods=['GET'])
 def get_sms_status(owner, repo):
-    r = request
     args = request.args
 
     depth = -1
@@ -200,6 +206,7 @@ def get_sms_status(owner, repo):
         ]
     }
     """
+    current_app.logger.info("get status...")
 
     bunch_dict = message['status']
     visitor = SubTreeNodeVisitor(depth)
@@ -280,6 +287,8 @@ def get_repo_status(owner: str, repo: str, sms_path: str='/'):
             'node_status': node_status
         }
     }
+
+    current_app.logger.info("get repo status")
 
     if owner not in owner_list:
         return jsonify(result)
