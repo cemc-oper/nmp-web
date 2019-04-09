@@ -4,7 +4,7 @@ import gzip
 from flask import request, json, jsonify
 
 from nmp_web.api import api_app
-from nmp_web.api.api_workflow import nwpc_monitor_platform_mongodb
+from nmp_web.common.database import nwpc_monitor_platform_mongodb
 from nmp_web.common.operation_system import owner_list
 
 

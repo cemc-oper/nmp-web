@@ -7,9 +7,9 @@ from flask import request, json, jsonify, current_app, url_for
 # from nwpc_workflow_model.visitor import SubTreeNodeVisitor, pre_order_travel_dict
 
 from nmp_web.api import api_app
-from nmp_web.api.api_workflow import nwpc_monitor_platform_mongodb
-from nmp_web.common import analytics
-from nmp_web.common.database import redis_client
+from nmp_web.common.database import nwpc_monitor_platform_mongodb
+# from nmp_web.common import analytics
+# from nmp_web.common.database import redis_client
 from nmp_web.common.operation_system import get_owner_repo_status_from_cache, owner_list
 
 
@@ -68,137 +68,14 @@ def post_workflow_status(owner, repo):
         }
         return jsonify(result)
 
-    key = "{owner}/{repo}/status".format(owner=owner, repo=repo)
-
-    current_app.logger.info("[{owner}/{repo}]data type: {data_type}".format(
-        owner=owner,
-        repo=repo,
-        data_type=message['data']['type'],
-    ))
-
-    if message['data']['type'] == 'status':
-        redis_value = message['data']
-
-        redis_value['type'] = 'sms'
-
-        # 保存到本地缓存
-        # TODO: use a single schema for mongodb cache and redis item.
-        """
-        redis_value:
-        {
-            "name": "sms_status_message_data",
-            "type": "record",
-            "fields": [
-                {"name": "owner", "type": "string"},
-                {"name": "repo", "type": "string"},
-                {"name": "sms_name", "type": "string"},
-                {"name": "time", "type": "string"},
-                {
-                    "name": "status",
-                    "doc": "bunch status dict",
-                    "type": { "type": "node" }
-                }
-            ]
-        }
-        """
-        redis_client.set(key, json.dumps(redis_value))
-
-    elif message['data']['type'] == 'takler_object':
-        status_blob = None
-        aborted_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['data']['type'] == 'status':
-                status_blob = a_blob
-            if a_blob['data']['type'] == 'aborted_tasks':
-                aborted_blob = a_blob
-
-        if status_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a status blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到本地缓存
-        redis_value = {
-            'owner': owner,
-            'repo': repo,
-            'sms_name': repo,
-            'time': status_blob['data']['content']['collected_time'],
-            'status': status_blob['data']['content']['status'],
-            'type': 'sms'
-        }
-        redis_client.set(key, json.dumps(redis_value))
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(status_blob)
-        if aborted_blob:
-            blobs_collection.insert_one(aborted_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    elif message['data']['type'] == 'nmp_model':
-        status_blob = None
-        aborted_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['_cls'] == 'Blob.StatusBlob':
-                status_blob = a_blob
-            if a_blob['_cls'] == 'Blob.AbortedTasksBlob':
-                aborted_blob = a_blob
-        # if status_blob is None:
-        #     result = {
-        #         'status': 'error',
-        #         'message': 'can\'t find a status blob.'
-        #     }
-        #     return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # save to redis
-        current_app.logger.info('[{owner}/{repo}] save status to redis...'.format(
-            owner=owner, repo=repo
-        ))
-        redis_value = {
-            'owner': owner,
-            'repo': repo,
-            'sms_name': repo,
-            'time': status_blob['data']['content']['collected_time'],
-            'status': status_blob['data']['content']['status'],
-            'type': 'sms'
-        }
-        redis_client.set(key, json.dumps(redis_value))
-
-        # save to mongodb
-        # NOTE: ignore status blob to speed up.
-        current_app.logger.info('[{owner}/{repo}] save status blob to mongo...'.format(
-            owner=owner, repo=repo
-        ))
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        # blobs_collection.insert_one(status_blob)
-        if aborted_blob:
-            current_app.logger.info('[{owner}/{repo}] save aborted blob to mongo...'.format(
-                owner=owner, repo=repo
-            ))
-            blobs_collection.insert_one(aborted_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
+    from nmp_web.common.workflow import handle_message
+    handle_message(owner, repo, message)
 
     # send data to google analytics
-    analytics.send_google_analytics_page_view(
-        url_for('api_app.post_workflow_status', owner=owner, repo=repo)
-    )
+    # NOTE: close google analytics
+    # analytics.send_google_analytics_page_view(
+    #     url_for('api_app.post_workflow_status', owner=owner, repo=repo)
+    # )
 
     result = {
         'status': 'ok'
@@ -266,7 +143,7 @@ def post_workflow_status(owner, repo):
 
 @api_app.route('/workflow/repos/<owner>/<repo>/status/head/', methods=['GET'])
 @api_app.route('/workflow/repos/<owner>/<repo>/status/head/<path:sms_path>', methods=['GET'])
-def get_repo_status(owner: str, repo: str, sms_path: str='/'):
+def get_repo_status(owner: str, repo: str, sms_path: str = '/'):
     path = '/'
     last_updated_time = None
     children_status = []

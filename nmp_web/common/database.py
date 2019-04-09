@@ -11,3 +11,6 @@ redis_client = redis.StrictRedis(host=redis_host, port=redis_port)
 
 mongodb_client = MongoClient(current_app.config['NWPC_MONITOR_WEB_CONFIG']['mongodb']['host']['ip'],
                              current_app.config['NWPC_MONITOR_WEB_CONFIG']['mongodb']['host']['port'])
+
+nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop
+sms_server_status = nwpc_monitor_platform_mongodb.sms_server_status
