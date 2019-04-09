@@ -13,7 +13,7 @@ export function fetchOperationSystemRepoAbortedTasks(owner, repo, id) {
     return function (dispatch) {
         dispatch(requestOperationSystemRepoAbortedTasks(owner, repo, id));
         
-        return $.getJSON('/api/v1/operation-systems/repos/' + owner + '/' + repo + '/aborted_tasks/' + id, {} ,function(data){
+        return $.getJSON('/api/v1/workflow/repos/' + owner + '/' + repo + '/aborted_tasks/' + id, {} ,function(data){
             dispatch(receiveOperationSystemRepoAbortedTasksSuccess({
                 data: data
             }));
@@ -57,7 +57,7 @@ export function fetchOperationSystemRepoTaskCheckUnfitNodes(owner, repo, id) {
     return function (dispatch) {
         dispatch(requestOperationSystemRepoTaskCheckUnfitNodes(owner, repo, id));
 
-        return $.getJSON('/api/v1/operation-systems/repos/' + owner + '/' + repo + '/task_check/unfit_nodes/' + id, {} ,function(data){
+        return $.getJSON('/api/v1/workflow/repos/' + owner + '/' + repo + '/task_check/unfit_nodes/' + id, {} ,function(data){
             dispatch(receiveOperationSystemRepoTaskCheckUnfitNodesSuccess({
                 data: data
             }));

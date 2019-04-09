@@ -15,7 +15,7 @@ export function fetchOperationSystemOwnerRepos(owner) {
         //     .then(data => dispatch(receiveOperationSystemOwnerReposSuccess({
         //             data: data
         //     })));
-        return $.getJSON('/api/v1/operation-systems/owners/' + owner + '/repos', {} ,function(data){
+        return $.getJSON('/api/v1/workflow/owners/' + owner + '/repos', {} ,function(data){
             dispatch(receiveOperationSystemOwnerReposSuccess({
                 data: data
             }));
@@ -73,7 +73,7 @@ export function fetchOperationSystemRepoStatus(owner, repo, path) {
         //             data: data
         //     })));
 
-        return $.getJSON('/api/v1/operation-systems/repos/' + owner + '/' + repo + '/status/head' + path, {} ,function(data){
+        return $.getJSON('/api/v1/workflow/repos/' + owner + '/' + repo + '/status/head' + path, {} ,function(data){
             dispatch(receiveOperationSystemRepoStatusSuccess({
                 data: data
             }));

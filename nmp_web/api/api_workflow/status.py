@@ -2,18 +2,16 @@
 import datetime
 import gzip
 
-import requests
-from flask import request, json, jsonify, url_for, current_app
-from nwpc_workflow_model.visitor import SubTreeNodeVisitor, pre_order_travel_dict
+# import requests
+from flask import request, json, jsonify, current_app, url_for
+# from nwpc_workflow_model.visitor import SubTreeNodeVisitor, pre_order_travel_dict
 
-from nmp_web.common.database import redis_client, mongodb_client
 from nmp_web.api import api_app
+from nmp_web.api.api_workflow import nwpc_monitor_platform_mongodb
 from nmp_web.common import analytics
-from nmp_web.common.operation_system import owner_list, get_owner_repo_status_from_cache
+from nmp_web.common.database import redis_client
+from nmp_web.common.operation_system import get_owner_repo_status_from_cache, owner_list
 
-# mongodb
-nwpc_monitor_platform_mongodb = mongodb_client.nwpc_monitor_platform_develop
-sms_server_status = nwpc_monitor_platform_mongodb.sms_server_status
 
 try:
     a = datetime.datetime.fromisoformat
@@ -22,8 +20,39 @@ except AttributeError:
     MonkeyPatch.patch_fromisoformat()
 
 
-@api_app.route('/repos/<owner>/<repo>/sms/status', methods=['POST'])
-def post_sms_status(owner, repo):
+@api_app.route('/workflow/owners/<owner>/repos', methods=['GET'])
+def get_owner_repos(owner: str):
+    # get repo list
+    repo_list = []
+    if owner in owner_list:
+        repo_list = owner_list[owner]['repos']
+
+    # get status for each repo in repo list
+    owner_repo_status = []
+    for a_repo in repo_list:
+        a_repo_name = a_repo['name']
+        cache_value = get_owner_repo_status_from_cache(owner, a_repo_name)
+        repo_status = None
+        last_updated_time = None
+        if cache_value is not None:
+            bunch_dict = cache_value['status']
+
+            repo_status = bunch_dict['status']
+            time_string = cache_value['time']
+            data_collect_datetime = datetime.datetime.fromisoformat(time_string)
+            last_updated_time = data_collect_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        owner_repo_status.append({
+            'owner': owner,
+            'repo': a_repo_name,
+            'status': repo_status,
+            'last_updated_time': last_updated_time
+        })
+
+    return jsonify(owner_repo_status)
+
+
+@api_app.route('/workflow/repos/<owner>/<repo>/status/head', methods=['POST'])
+def post_workflow_status(owner, repo):
     content_encoding = request.headers.get('content-encoding', '').lower()
     if content_encoding == 'gzip':
         gzipped_data = request.data
@@ -168,7 +197,7 @@ def post_sms_status(owner, repo):
 
     # send data to google analytics
     analytics.send_google_analytics_page_view(
-        url_for('api_app.post_sms_status', owner=owner, repo=repo)
+        url_for('api_app.post_workflow_status', owner=owner, repo=repo)
     )
 
     result = {
@@ -177,97 +206,66 @@ def post_sms_status(owner, repo):
     return jsonify(result)
 
 
-@api_app.route('/repos/<owner>/<repo>/sms/status', methods=['GET'])
-def get_sms_status(owner, repo):
-    args = request.args
-
-    depth = -1
-    if 'depth' in args:
-        depth = int(args['depth'])
-
-    # 保存到本地缓存
-    message = get_owner_repo_status_from_cache(owner, repo)
-
-    """
-    message:
-    {
-        "name": "sms_status_message_data",
-        "type": "record",
-        "fields": [
-            {"name": "owner", "type": "string"},
-            {"name": "repo", "type": "string"},
-            {"name": "sms_name", "type": "string"},
-            {"name": "time", "type": "string"},
-            {"name": "type", "type": "enum", "symbols": ["sms"]},
-            {
-                "name": "status",
-                "doc": "bunch status dict",
-                "type": { "type": "node" }
-            }
-        ]
-    }
-    """
-    current_app.logger.info("get status...")
-
-    bunch_dict = message['status']
-    visitor = SubTreeNodeVisitor(depth)
-    pre_order_travel_dict(bunch_dict, visitor)
-
-    message['status'] = bunch_dict
-
-    # send data to google analytics
-    google_analytics_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
-    if google_analytics_config['enable'] is True:
-        post_data = {
-            'v': google_analytics_config['version'],
-            't': 'pageview',
-            'tid': google_analytics_config['track_id'],
-            'cid': google_analytics_config['client_id'],
-            'dh': google_analytics_config['document_host'],
-            'dp': url_for('api_app.get_sms_status', owner=owner, repo=repo)
-        }
-        requests.post(google_analytics_config['url'], data=post_data)
-
-    result = {
-        'status': 'ok',
-        'data': message
-    }
-    return jsonify(result)
-
-
-@api_app.route('/operation-systems/owners/<owner>/repos', methods=['GET'])
-def get_owner_repos(owner: str):
-    # get repo list
-    repo_list = []
-    if owner in owner_list:
-        repo_list = owner_list[owner]['repos']
-
-    # get status for each repo in repo list
-    owner_repo_status = []
-    for a_repo in repo_list:
-        a_repo_name = a_repo['name']
-        cache_value = get_owner_repo_status_from_cache(owner, a_repo_name)
-        repo_status = None
-        last_updated_time = None
-        if cache_value is not None:
-            bunch_dict = cache_value['status']
-
-            repo_status = bunch_dict['status']
-            time_string = cache_value['time']
-            data_collect_datetime = datetime.datetime.fromisoformat(time_string)
-            last_updated_time = data_collect_datetime.strftime('%Y-%m-%d %H:%M:%S')
-        owner_repo_status.append({
-            'owner': owner,
-            'repo': a_repo_name,
-            'status': repo_status,
-            'last_updated_time': last_updated_time
-        })
-
-    return jsonify(owner_repo_status)
+# @api_app.route('/workflow/repos/<owner>/<repo>/status', methods=['GET'])
+# def get_workflow_status(owner, repo):
+#     args = request.args
+#
+#     depth = -1
+#     if 'depth' in args:
+#         depth = int(args['depth'])
+#
+#     # 保存到本地缓存
+#     message = get_owner_repo_status_from_cache(owner, repo)
+#
+#     """
+#     message:
+#     {
+#         "name": "sms_status_message_data",
+#         "type": "record",
+#         "fields": [
+#             {"name": "owner", "type": "string"},
+#             {"name": "repo", "type": "string"},
+#             {"name": "sms_name", "type": "string"},
+#             {"name": "time", "type": "string"},
+#             {"name": "type", "type": "enum", "symbols": ["sms"]},
+#             {
+#                 "name": "status",
+#                 "doc": "bunch status dict",
+#                 "type": { "type": "node" }
+#             }
+#         ]
+#     }
+#     """
+#     current_app.logger.info("get status...")
+#
+#     bunch_dict = message['status']
+#     visitor = SubTreeNodeVisitor(depth)
+#     pre_order_travel_dict(bunch_dict, visitor)
+#
+#     message['status'] = bunch_dict
+#
+#     # send data to google analytics
+#     google_analytics_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
+#     if google_analytics_config['enable'] is True:
+#         post_data = {
+#             'v': google_analytics_config['version'],
+#             't': 'pageview',
+#             'tid': google_analytics_config['track_id'],
+#             'cid': google_analytics_config['client_id'],
+#             'dh': google_analytics_config['document_host'],
+#             'dp': url_for('api_app.get_workflow_status', owner=owner, repo=repo)
+#         }
+#         requests.post(google_analytics_config['url'], data=post_data)
+#
+#     result = {
+#         'status': 'ok',
+#         'data': message
+#     }
+#     return jsonify(result)
 
 
-@api_app.route('/operation-systems/repos/<owner>/<repo>/status/head/', methods=['GET'])
-@api_app.route('/operation-systems/repos/<owner>/<repo>/status/head/<path:sms_path>', methods=['GET'])
+@api_app.route('/workflow/repos/<owner>/<repo>/status/head/', methods=['GET'])
+@api_app.route('/workflow/repos/<owner>/<repo>/status/head/<path:sms_path>', methods=['GET'])
 def get_repo_status(owner: str, repo: str, sms_path: str='/'):
     path = '/'
     last_updated_time = None
@@ -364,7 +362,7 @@ def get_repo_status(owner: str, repo: str, sms_path: str='/'):
     return jsonify(result)
 
 
-@api_app.route('/operation-systems/repos/<owner>/<repo>/aborted_tasks/<int:aborted_id>', methods=['GET'])
+@api_app.route('/workflow/repos/<owner>/<repo>/aborted_tasks/<int:aborted_id>', methods=['GET'])
 def get_repo_aborted_tasks(owner, repo, aborted_id):
     aborted_tasks_content = {
         'update_time': None,
@@ -404,117 +402,3 @@ def get_repo_aborted_tasks(owner, repo, aborted_id):
     }
 
     return jsonify(aborted_tasks_content)
-
-
-@api_app.route('/operation-systems/repos/<owner>/<repo>/task_check', methods=['POST'])
-@api_app.route('/repos/<owner>/<repo>/sms/task-check', methods=['POST'])
-def post_sms_task_check(owner, repo):
-    content_encoding = request.headers.get('content-encoding', '').lower()
-    if content_encoding == 'gzip':
-        gzipped_data = request.data
-        data_string = gzip.decompress(gzipped_data)
-        body = json.loads(data_string.decode('utf-8'))
-    else:
-        body = request.form
-
-    message = json.loads(body['message'])
-    if 'error' in message:
-        result = {
-            'status': 'ok'
-        }
-        return jsonify(result)
-
-    if message['data']['type'] == 'takler_object':
-        unfit_nodes_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['data']['type'] == 'unfit_nodes':
-                unfit_nodes_blob = a_blob
-
-        if unfit_nodes_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a unfit nodes blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(unfit_nodes_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    elif message['data']['type'] == 'nmp_model':
-        unfit_nodes_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['_cls'] == 'Blob.UnfitNodesBlob':
-                unfit_nodes_blob = a_blob
-
-        if unfit_nodes_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a unfit nodes blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(unfit_nodes_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    else:
-        raise ValueError('data type is not supported: {data_type}'.format(data_type=message['data']['type']))
-
-    result = {
-        'status': 'ok'
-    }
-    return jsonify(result)
-
-
-@api_app.route('/operation-systems/repos/<owner>/<repo>/task_check/unfit_nodes/<int:unfit_nodes_id>', methods=['GET'])
-def get_repo_unfit_nodes(owner, repo, unfit_nodes_id):
-    unfit_nodes_content = {
-        'update_time': None,
-        'name': None,
-        'trigger': None,
-        'unfit_node_list': []
-    }
-
-    if owner not in owner_list:
-        return jsonify(unfit_nodes_content)
-
-    found_repo = False
-    for a_repo in owner_list[owner]['repos']:
-        if repo == a_repo['name']:
-            found_repo = True
-            break
-    if not found_repo:
-        return jsonify(unfit_nodes_content)
-
-    blobs_collection = nwpc_monitor_platform_mongodb.blobs
-    query_key = {
-        'owner': owner,
-        'repo': repo,
-        'ticket_id': unfit_nodes_id
-    }
-    query_result = blobs_collection.find_one(query_key)
-    if not query_result:
-        return jsonify(unfit_nodes_content)
-
-    blob_content = query_result['data']['content']
-
-    unfit_nodes_content = blob_content
-
-    return jsonify(unfit_nodes_content)
