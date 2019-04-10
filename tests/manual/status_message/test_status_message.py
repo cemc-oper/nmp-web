@@ -2,7 +2,7 @@
 
 
 def test_status(app):
-    from nmp_web.common.workflow import handle_status_message
+    from nmp_web.common.workflow.status import handle_status_message
     with app.app_context():
         message_dict = {
             'app': 'nmp_broker',

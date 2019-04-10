@@ -2,7 +2,7 @@
 
 
 def test_nmp_model(app):
-    from nmp_web.common.workflow import handle_nmp_model_message
+    from nmp_web.common.workflow.status import handle_nmp_model_message
     with app.app_context():
         message_dict = {
             'app': 'nmp_broker',

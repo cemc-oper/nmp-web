@@ -65,7 +65,7 @@ def post_workflow_status(owner, repo):
         }
         return jsonify(result)
 
-    from nmp_web.common.workflow import handle_message
+    from nmp_web.common.workflow.status import handle_message
     handle_message(owner, repo, message)
 
     # send data to google analytics
