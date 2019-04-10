@@ -17,7 +17,6 @@ def create_app(config_file_path=None):
                 template_folder=template_folder)
 
     app.config.from_object(load_config(config_file_path))
-    app.secret_key = '\x99g\x0b\xedY\xcf\n\xdd\xeb\xd7\\2K\xf94Cq{\xea\xe6\x8c\x17\xdf\x10'
 
     app.json_encoder = NwpcMonitorWebApiJSONEncoder
     app.url_map.converters['no_static'] = NoStaticConverter

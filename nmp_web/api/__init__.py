@@ -6,4 +6,4 @@ api_app = Blueprint('api_app', __name__, template_folder='template')
 import nmp_web.api.api_hpc
 import nmp_web.api.api_workflow
 import nmp_web.api.api_weixin
-import nmp_web.api.api_test
+# import nmp_web.api.api_test

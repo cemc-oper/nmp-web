@@ -47,6 +47,7 @@ def get_owner_repos(owner: str):
     return jsonify(owner_repo_status)
 
 
+@api_app.route('/repos/<owner>/<repo>/sms/status', methods=['POST'])
 @api_app.route('/workflow/repos/<owner>/<repo>/status/head', methods=['POST'])
 def post_workflow_status(owner, repo):
     content_encoding = request.headers.get('content-encoding', '').lower()
