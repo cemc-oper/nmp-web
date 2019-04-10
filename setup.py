@@ -25,6 +25,7 @@ setup(
         'redis',
         'requests',
         'SQLAlchemy',
-        'backports-datetime-fromisoformat;python_version<"3.7"'
+        'backports-datetime-fromisoformat;python_version<"3.7"',
+        'leancloud'
     ]
 )

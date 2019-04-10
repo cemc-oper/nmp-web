@@ -2,14 +2,10 @@
 import datetime
 import gzip
 
-# import requests
-from flask import request, json, jsonify, current_app, url_for
-# from nwpc_workflow_model.visitor import SubTreeNodeVisitor, pre_order_travel_dict
+from flask import request, json, jsonify, current_app
+import leancloud
 
 from nmp_web.api import api_app
-from nmp_web.common.database import nwpc_monitor_platform_mongodb
-# from nmp_web.common import analytics
-# from nmp_web.common.database import redis_client
 from nmp_web.common.operation_system import get_owner_repo_status_from_cache, owner_list
 
 
@@ -81,64 +77,6 @@ def post_workflow_status(owner, repo):
         'status': 'ok'
     }
     return jsonify(result)
-
-
-# @api_app.route('/workflow/repos/<owner>/<repo>/status', methods=['GET'])
-# def get_workflow_status(owner, repo):
-#     args = request.args
-#
-#     depth = -1
-#     if 'depth' in args:
-#         depth = int(args['depth'])
-#
-#     # 保存到本地缓存
-#     message = get_owner_repo_status_from_cache(owner, repo)
-#
-#     """
-#     message:
-#     {
-#         "name": "sms_status_message_data",
-#         "type": "record",
-#         "fields": [
-#             {"name": "owner", "type": "string"},
-#             {"name": "repo", "type": "string"},
-#             {"name": "sms_name", "type": "string"},
-#             {"name": "time", "type": "string"},
-#             {"name": "type", "type": "enum", "symbols": ["sms"]},
-#             {
-#                 "name": "status",
-#                 "doc": "bunch status dict",
-#                 "type": { "type": "node" }
-#             }
-#         ]
-#     }
-#     """
-#     current_app.logger.info("get status...")
-#
-#     bunch_dict = message['status']
-#     visitor = SubTreeNodeVisitor(depth)
-#     pre_order_travel_dict(bunch_dict, visitor)
-#
-#     message['status'] = bunch_dict
-#
-#     # send data to google analytics
-#     google_analytics_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['analytics']['google_analytics']
-#     if google_analytics_config['enable'] is True:
-#         post_data = {
-#             'v': google_analytics_config['version'],
-#             't': 'pageview',
-#             'tid': google_analytics_config['track_id'],
-#             'cid': google_analytics_config['client_id'],
-#             'dh': google_analytics_config['document_host'],
-#             'dp': url_for('api_app.get_workflow_status', owner=owner, repo=repo)
-#         }
-#         requests.post(google_analytics_config['url'], data=post_data)
-#
-#     result = {
-#         'status': 'ok',
-#         'data': message
-#     }
-#     return jsonify(result)
 
 
 @api_app.route('/workflow/repos/<owner>/<repo>/status/head/', methods=['GET'])
@@ -259,20 +197,27 @@ def get_repo_aborted_tasks(owner, repo, aborted_id):
     if not found_repo:
         return jsonify(aborted_tasks_content)
 
-    blobs_collection = nwpc_monitor_platform_mongodb.blobs
-    query_key = {
-        'owner': owner,
-        'repo': repo,
-        'ticket_id': aborted_id
-    }
-    query_result = blobs_collection.find_one(query_key)
-    if not query_result:
+    # blobs_collection = nwpc_monitor_platform_mongodb.blobs
+    # query_key = {
+    #     'owner': owner,
+    #     'repo': repo,
+    #     'ticket_id': aborted_id
+    # }
+    # query_result = blobs_collection.find_one(query_key)
+
+    from nmp_web.common.database import Blob
+    query = leancloud.Query(Blob)
+    query.equal_to('ticket_id', aborted_id)
+    query_list = query.find()
+    if len(query_list) == 0:
         return jsonify(aborted_tasks_content)
 
-    blob_content = query_result['data']['content']
+    blob = query_list[0]
+
+    blob_content = blob.get('data')['content']
 
     aborted_tasks_content = {
-        'update_time': query_result['timestamp'],
+        'update_time': blob.get('timestamp'),
         'collected_time': blob_content['collected_time'],
         'status_blob_id': blob_content['status_blob_ticket_id'],
         'tasks': blob_content['tasks']
