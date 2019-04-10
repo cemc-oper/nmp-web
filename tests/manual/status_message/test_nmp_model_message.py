@@ -14,7 +14,8 @@ def test_nmp_model(app):
                         'data': {
                             '_cls': 'StatusBlobData',
                             'content': {
-                                'collected_time': '2018-09-21T15:20:59', 'server_name': 'nwpc_op',
+                                'collected_time': '2018-09-21T15:20:59',
+                                'server_name': 'nwpc_op',
                                 'status': {
                                     'children': [
                                         {
