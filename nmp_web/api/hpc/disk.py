@@ -3,9 +3,9 @@ import gzip
 
 from flask import request, json, jsonify, url_for
 
-import nmp_web.common.data_store.mongodb
+import nmp_web.common.data_store.leancloud
 from nmp_web.api import api_app
-from nmp_web.common import data_store, analytics
+# from nmp_web.common import analytics
 
 
 @api_app.route('/hpc/users/<user>/disk/usage', methods=['POST'])
@@ -27,12 +27,12 @@ def receive_disk_usage(user):
         return jsonify(result)
 
     value = message
-    nmp_web.common.data_store.mongodb.save_disk_usage_to_mongodb(user, value)
+    nmp_web.common.data_store.leancloud.save_disk_usage(user, value)
 
     # send data to google analytics
-    analytics.send_google_analytics_page_view(
-        url_for('api_app.receive_disk_usage', user=user)
-    )
+    # analytics.send_google_analytics_page_view(
+    #     url_for('api_app.receive_disk_usage', user=user)
+    # )
 
     result = {
         'status': 'ok'
@@ -42,7 +42,7 @@ def receive_disk_usage(user):
 
 @api_app.route('/hpc/users/<user>/disk/usage', methods=['GET'])
 def request_disk_usage(user):
-    result = nmp_web.common.data_store.mongodb.get_disk_usage_from_mongodb(user)
+    result = nmp_web.common.data_store.leancloud.get_disk_usage(user)
     return jsonify(result)
 
 
@@ -65,12 +65,12 @@ def receive_disk_space():
         return jsonify(result)
 
     value = message
-    nmp_web.common.data_store.mongodb.save_disk_space_to_mongodb(value)
+    nmp_web.common.data_store.leancloud.save_disk_space(value)
 
     # send data to google analytics
-    analytics.send_google_analytics_page_view(
-        url_for('api_app.receive_disk_space')
-    )
+    # analytics.send_google_analytics_page_view(
+    #     url_for('api_app.receive_disk_space')
+    # )
 
     result = {
         'status': 'ok'
@@ -80,5 +80,5 @@ def receive_disk_space():
 
 @api_app.route('/hpc/info/disk/space', methods=['GET'])
 def request_disk_space():
-    result = nmp_web.common.data_store.mongodb.get_disk_space_from_mongodb()
+    result = nmp_web.common.data_store.leancloud.get_disk_space()
     return jsonify(result)

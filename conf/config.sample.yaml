@@ -11,25 +11,14 @@ nwpc_monitor_web:
 
   secret_key: secret key for flask
 
-  mysql:
-    host:
-      ip: ip address
-      port: port number
-    user: user
-    password: password
-    database: database name
-    charset: charset
-    pool_recycle: number
-
-  mongodb:
-    host:
-      ip: ip address
-      port: port number
-
   redis:
     host:
       ip: ip address
       port: port number
+
+  leancloud:
+    app_id: "app id"
+    app_key: "app key"
 
   analytics:
     google_analytics:

@@ -3,11 +3,10 @@ import datetime
 import gzip
 
 from flask import request, json, jsonify, current_app
-import leancloud
 
 from nmp_web.api import api_app
 from nmp_web.common.workflow import owner_list
-from nmp_web.common.data_store.redis import get_owner_repo_status_from_cache
+from nmp_web.common.workflow.status import get_owner_repo_status_from_cache
 
 try:
     a = datetime.datetime.fromisoformat
@@ -206,14 +205,11 @@ def get_repo_aborted_tasks(owner, repo, aborted_id):
     # }
     # query_result = blobs_collection.find_one(query_key)
 
-    from nmp_web.common.data_store.leancloud import Blob
-    query = leancloud.Query(Blob)
-    query.equal_to('ticket_id', aborted_id)
-    query_list = query.find()
-    if len(query_list) == 0:
-        return jsonify(aborted_tasks_content)
+    from nmp_web.common.data_store.leancloud import get_blob
+    blob = get_blob(aborted_id)
 
-    blob = query_list[0]
+    if blob is None:
+        return jsonify(aborted_tasks_content)
 
     blob_content = blob.get('data')['content']
 

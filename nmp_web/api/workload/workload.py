@@ -3,10 +3,9 @@ import gzip
 
 from flask import request, json, jsonify, current_app, url_for
 
-import nmp_web.common.data_store.mongodb
+from nmp_web.common.data_store.leancloud import get_hpc_loadleveler, get_blob
 from nmp_web.api import api_app
-from nmp_web.common.database import nwpc_monitor_platform_mongodb
-from nmp_web.common import data_store, analytics
+# from nmp_web.common import analytics
 
 
 @api_app.route('/hpc/users/<user>/loadleveler/status', methods=['POST'])
@@ -27,70 +26,13 @@ def receive_loadleveler_status(user):
         }
         return jsonify(result)
 
-    if message['data']['type'] == 'takler_object':
-        abnormal_jobs_blob = None
-        for a_blob in message['data']['blobs']:
-            if (
-                a_blob['data']['type'] == 'hpc_loadleveler_status' and
-                a_blob['data']['name'] == 'abnormal_jobs'
-            ):
-                abnormal_jobs_blob = a_blob
-
-        if abnormal_jobs_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a abnormal jobs blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(abnormal_jobs_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    elif message['data']['type'] == 'nmp_model':
-        abnormal_jobs_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['data']['_cls'] == 'AbnormalJobsBlobData':
-                abnormal_jobs_blob = a_blob
-
-        if abnormal_jobs_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a abnormal jobs blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(abnormal_jobs_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    elif message['data']['type'] == 'nmp_model_job_list':
-        # TODO: nmp_model
-        current_app.logger.warn("message type is not supported: nmp_model_job_list".format())
-    elif message['data']['type'] == 'job_list':
-        value = message
-        nmp_web.common.data_store.mongodb.save_hpc_loadleveler_status_to_cache(user, value)
+    from nmp_web.common.workload.loadleveler import handle_message
+    handle_message(user, "loadleveler", message)
 
     # send data to google analytics
-    analytics.send_google_analytics_page_view(
-        url_for('api_app.receive_loadleveler_status', user=user)
-    )
+    # analytics.send_google_analytics_page_view(
+    #     url_for('api_app.receive_loadleveler_status', user=user)
+    # )
 
     result = {
         'status': 'ok'
@@ -100,7 +42,7 @@ def receive_loadleveler_status(user):
 
 @api_app.route('/hpc/users/<user>/loadleveler/status', methods=['GET'])
 def request_loadleveler_status(user):
-    result = nmp_web.common.data_store.mongodb.get_hpc_loadleveler_status_from_cache(user)
+    result = get_hpc_loadleveler(user)
     return jsonify(result)
 
 
@@ -113,11 +55,7 @@ def get_hpc_loadleveler_status_abnormal_jobs(user, abnormal_jobs_id):
         'abnormal_jobs_id': abnormal_jobs_id
     }
 
-    blobs_collection = nwpc_monitor_platform_mongodb.blobs
-    query_key = {
-        'ticket_id': abnormal_jobs_id
-    }
-    query_result = blobs_collection.find_one(query_key)
+    query_result = get_blob(abnormal_jobs_id)
     if not query_result:
         return jsonify(abnormal_jobs_content)
 

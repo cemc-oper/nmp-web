@@ -4,7 +4,6 @@ import gzip
 from flask import request, json, jsonify
 
 from nmp_web.api import api_app
-from nmp_web.common.database import nwpc_monitor_platform_mongodb
 from nmp_web.common.workflow import owner_list
 
 
@@ -25,58 +24,8 @@ def post_sms_task_check(owner, repo):
         }
         return jsonify(result)
 
-    if message['data']['type'] == 'takler_object':
-        unfit_nodes_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['data']['type'] == 'unfit_nodes':
-                unfit_nodes_blob = a_blob
-
-        if unfit_nodes_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a unfit nodes blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(unfit_nodes_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    elif message['data']['type'] == 'nmp_model':
-        unfit_nodes_blob = None
-        for a_blob in message['data']['blobs']:
-            if a_blob['_cls'] == 'Blob.UnfitNodesBlob':
-                unfit_nodes_blob = a_blob
-
-        if unfit_nodes_blob is None:
-            result = {
-                'status': 'error',
-                'message': 'can\'t find a unfit nodes blob.'
-            }
-            return jsonify(result)
-
-        tree_object = message['data']['trees'][0]
-        commit_object = message['data']['commits'][0]
-
-        # 保存到 mongodb
-        blobs_collection = nwpc_monitor_platform_mongodb.blobs
-        blobs_collection.insert_one(unfit_nodes_blob)
-
-        trees_collection = nwpc_monitor_platform_mongodb.trees
-        trees_collection.insert_one(tree_object)
-
-        commits_collection = nwpc_monitor_platform_mongodb.commits
-        commits_collection.insert_one(commit_object)
-    else:
-        raise ValueError('data type is not supported: {data_type}'.format(data_type=message['data']['type']))
+    from nmp_web.common.workflow.node_check import handle_node_check_message
+    handle_node_check_message(owner, repo, message)
 
     result = {
         'status': 'ok'
@@ -104,17 +53,13 @@ def get_repo_unfit_nodes(owner, repo, unfit_nodes_id):
     if not found_repo:
         return jsonify(unfit_nodes_content)
 
-    blobs_collection = nwpc_monitor_platform_mongodb.blobs
-    query_key = {
-        'owner': owner,
-        'repo': repo,
-        'ticket_id': unfit_nodes_id
-    }
-    query_result = blobs_collection.find_one(query_key)
-    if not query_result:
+    from nmp_web.common.data_store.leancloud import get_blob
+    blob = get_blob(unfit_nodes_id)
+
+    if blob is None:
         return jsonify(unfit_nodes_content)
 
-    blob_content = query_result['data']['content']
+    blob_content = blob.get('data')['content']
 
     unfit_nodes_content = blob_content
 

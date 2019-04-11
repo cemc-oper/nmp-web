@@ -24,30 +24,30 @@ class Config(object):
                     elif flask_debug is not True:
                         self.DEBUG = False
 
-            if 'mysql' in nwpc_monitor_web_config:
-                mysql_config = nwpc_monitor_web_config['mysql']
-
-                mysql_host = mysql_config['host']
-                mysql_ip = mysql_host['ip']
-                mysql_port = mysql_host['port']
-                mysql_user = mysql_config['user']
-                mysql_password = mysql_config['password']
-                mysql_database = mysql_config['database']
-                mysql_charset = mysql_config['charset']
-
-                pool_recycle = mysql_config['pool_recycle']
-
-                self.SQLALCHEMY_DATABASE_URI = \
-                    "mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}?charset={charset}".format(
-                        user=mysql_user,
-                        password=mysql_password,
-                        host=mysql_ip,
-                        port=mysql_port,
-                        database=mysql_database,
-                        charset=mysql_charset
-                    )
-
-                self.SQLALCHEMY_POOL_RECYCLE = pool_recycle
+            # if 'mysql' in nwpc_monitor_web_config:
+            #     mysql_config = nwpc_monitor_web_config['mysql']
+            #
+            #     mysql_host = mysql_config['host']
+            #     mysql_ip = mysql_host['ip']
+            #     mysql_port = mysql_host['port']
+            #     mysql_user = mysql_config['user']
+            #     mysql_password = mysql_config['password']
+            #     mysql_database = mysql_config['database']
+            #     mysql_charset = mysql_config['charset']
+            #
+            #     pool_recycle = mysql_config['pool_recycle']
+            #
+            #     self.SQLALCHEMY_DATABASE_URI = \
+            #         "mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}?charset={charset}".format(
+            #             user=mysql_user,
+            #             password=mysql_password,
+            #             host=mysql_ip,
+            #             port=mysql_port,
+            #             database=mysql_database,
+            #             charset=mysql_charset
+            #         )
+            #
+            #     self.SQLALCHEMY_POOL_RECYCLE = pool_recycle
 
 
 def load_config(config_file_path):
