@@ -1,7 +1,7 @@
 # coding=utf-8
 import requests
 
-from nmp_web.common.cache import save_weixin_access_token_to_cache, get_weixin_access_token_from_cache
+from nmp_web.common.data_store.redis import save_weixin_access_token_to_cache, get_weixin_access_token_from_cache
 
 REQUEST_POST_TIME_OUT = 60
 

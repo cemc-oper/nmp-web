@@ -1,5 +1,4 @@
 # coding: utf-8
-
 from nmp_web.common.database import mongodb_client
 
 # mongodb
@@ -11,8 +10,6 @@ hpc_loadleveler_status = nwpc_monitor_platform_mongodb.hpc_loadleveler_status
 
 
 # disk usage
-
-
 def save_disk_usage_to_mongodb(user: str, value: dict) -> None:
     key = {
         "user": user
@@ -44,8 +41,6 @@ def get_disk_space_from_mongodb() -> dict:
 
 
 # loadleveler status
-
-
 def save_hpc_loadleveler_status_to_cache(user: str, value: dict) -> tuple:
     key = {
         'data.user': user

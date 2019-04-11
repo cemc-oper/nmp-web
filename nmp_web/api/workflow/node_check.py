@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 
 from nmp_web.api import api_app
 from nmp_web.common.database import nwpc_monitor_platform_mongodb
-from nmp_web.common.operation_system import owner_list
+from nmp_web.common.workflow import owner_list
 
 
 @api_app.route('/workflow/repos/<owner>/<repo>/task_check', methods=['POST'])

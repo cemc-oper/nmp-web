@@ -2,4 +2,4 @@
 
 import nmp_web.controller.main
 import nmp_web.controller.hpc
-import nmp_web.controller.operation_system
+import nmp_web.controller.workflow

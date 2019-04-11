@@ -83,7 +83,7 @@ def handle_nmp_model_message(owner, repo, message):
     redis_client.set(key, json.dumps(redis_value))
 
     # save to leancloud
-    from nmp_web.common.database import Blob
+    from nmp_web.common.data_store.leancloud import Blob
 
     if aborted_blob:
         current_app.logger.info('[{owner}/{repo}] save aborted blob to leancloud...'.format(

@@ -20,7 +20,3 @@ sms_server_status = nwpc_monitor_platform_mongodb.sms_server_status
 # leancloud
 leancloud_config = current_app.config['NWPC_MONITOR_WEB_CONFIG']['leancloud']
 leancloud.init(leancloud_config["app_id"], leancloud_config["app_key"])
-
-
-class Blob(leancloud.Object):
-    pass
