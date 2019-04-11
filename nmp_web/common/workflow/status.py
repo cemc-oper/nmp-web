@@ -74,16 +74,13 @@ def handle_nmp_model_message(owner, repo, message):
     save_workflow_status_blob(owner, repo, status_blob)
 
     # save to leancloud
-    from nmp_web.common.data_store.leancloud import Blob
+    from nmp_web.common.data_store.leancloud import save_blob
 
     if aborted_blob:
         current_app.logger.info('[{owner}/{repo}] save aborted blob to leancloud...'.format(
             owner=owner, repo=repo
         ))
-        blob = Blob()
-        aborted_blob['timestamp'] = datetime.datetime.strptime(aborted_blob['timestamp'], "%Y-%m-%dT%H:%M:%S")
-        blob.set(aborted_blob)
-        blob.save()
+        save_blob(aborted_blob)
     else:
         current_app.logger.warn('[{owner}/{repo}] we don\'t save other blobs to leancloud'.format(
             owner=owner, repo=repo
