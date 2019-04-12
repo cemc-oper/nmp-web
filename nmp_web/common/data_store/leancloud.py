@@ -40,7 +40,9 @@ def get_blob(ticket_id: int) -> Blob or None:
     return query_list[0]
 
 
-def save_workflow_status(owner, repo, blob) -> None:
+def _save_workflow_status(owner, repo, blob) -> None:
+    # WARNING: don't use this because LeanCloud AVObject can only store object smaller than 128KB.
+    #   Maybe AVFile should be used together with AVObject.
     b = WorkflowStatus()
     blob['timestamp'] = datetime.datetime.strptime(blob['timestamp'], "%Y-%m-%dT%H:%M:%S")
     b.set(blob)

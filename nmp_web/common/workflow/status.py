@@ -91,10 +91,11 @@ def get_owner_repo_status_from_cache(owner, repo):
     from nmp_web.common.data_store.redis import get_workflow_status
     redis_value = get_workflow_status(owner, repo)
     if redis_value is None:
-        from nmp_web.common.data_store.leancloud import get_workflow_status
-        status = get_workflow_status(owner, repo)
-        if status is None:
-            return None
+        # from nmp_web.common.data_store.leancloud import get_workflow_status
+        # status = get_workflow_status(owner, repo)
+        # if status is None:
+        #     return None
+        return None
 
-        redis_value = save_workflow_status_blob(owner, repo, status)
+        # redis_value = save_workflow_status_blob(owner, repo, status)
     return redis_value
