@@ -48,21 +48,21 @@ MonitorWebAppTab.defaultProps = {
         {
             'name':'operation-system',
             'link': '/',
-            'label': '系统',
+            'label': '主页',
             'icon': '/static/image/icon_tabbar.png'
         },
-        {
-            'name':'hpc/disk',
-            'link': '/hpc/nwp_xp/disk/usage',
-            'label': '空间',
-            'icon': '/static/image/icon_tabbar.png'
-        },
-        {
-            'name':'hpc/loadleveler',
-            'link': '/hpc/nwp_xp/loadleveler/status',
-            'label': '队列',
-            'icon': '/static/image/icon_tabbar.png'
-        },
+        // {
+        //     'name':'hpc/disk',
+        //     'link': '/hpc/nwp_xp/disk/usage',
+        //     'label': 'HPC',
+        //     'icon': '/static/image/icon_tabbar.png'
+        // },
+        // {
+        //     'name':'hpc/loadleveler',
+        //     'link': '/hpc/nwp_xp/loadleveler/status',
+        //     'label': 'QUEUE',
+        //     'icon': '/static/image/icon_tabbar.png'
+        // },
         {
             'name':'about',
             'link': '/about',

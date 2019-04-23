@@ -70,15 +70,11 @@ class AboutApp extends Component{
                         <article className="weui-article">
                             <h1>关于</h1>
                             <section>
-                                <h2 className="title">目标</h2>
-                                <p>辅助业务系统运行维护。</p>
-                            </section>
-                            <section>
                                 <h2 className="title">当前用户</h2>
                                 <p>{user_info}</p>
                             </section>
                             <section>
-                                <h2 className="title">维护</h2>
+                                <h2 className="title">开发者</h2>
                                 <p>perillaroc</p>
                             </section>
                         </article>

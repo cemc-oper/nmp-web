@@ -88,10 +88,10 @@ class HpcDiskUsageApp extends Component{
 
         return (
             <div>
-                <h1 className="page_title">业务账户磁盘限额</h1>
+                <h1 className="page_title">磁盘</h1>
                 <div style={link_box_style}>
                     <div className="button-sp-area">
-                        <a href="/hpc/info/disk/space" className="weui-btn weui-btn_mini weui-btn_default">查看磁盘空间</a>
+                        <a href="/hpc/info/disk/space" className="weui-btn weui-btn_mini weui-btn_default">Show space</a>
                     </div>
                 </div>
                 <FileSystemUsagePieChartLegend/>
