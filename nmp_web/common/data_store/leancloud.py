@@ -1,5 +1,8 @@
 # coding: utf-8
 import datetime
+# import os
+
+# os.environ['LC_API_SERVER'] = 'https://avoscloud.com'
 
 import leancloud
 
