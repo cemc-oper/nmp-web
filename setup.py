@@ -6,7 +6,7 @@ setup(
 
     version='5.0.0',
 
-    description='A website on cloud for NWPC monitor platform.',
+    description='A cloud website for NMP(NWPC monitor platform).',
     long_description=__doc__,
 
     packages=['nmp_web'],
