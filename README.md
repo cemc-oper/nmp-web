@@ -104,7 +104,7 @@ Add `nmp_web` in `site-available` directory.
 
 ```nginx
 server {
-    listen      80; # 监听80端口
+    listen      80;
 
     server_name www.nwpcmonitor.cc;
 
@@ -119,17 +119,14 @@ server {
     access_log path_to_access_log;
     error_log  path_to_error_log;
 
-    # 处理静态文件/favicon.ico:
     location /favicon.ico {
         root /srv/nmp-web/www/nmp-web;
     }
 
-    # 处理静态资源:
     location ~ ^\/static\/.*$ {
         root /srv/nmp-web/www/nmp-web;
     }
 
-    # 动态请求转发到6200端口(gunicorn):
     location / {
         proxy_pass       http://127.0.0.1:3000;
         proxy_set_header X-Real-IP $remote_addr;
