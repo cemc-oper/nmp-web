@@ -54,6 +54,11 @@ def handle_status_message(owner, repo, message):
         ]
     }
     """
+    current_app.logger.info("[{owner}/{repo}] save status to redis: {time}".format(
+        owner=owner,
+        repo=repo,
+        time=redis_value['time'],
+    ))
     key = "{owner}/{repo}/status".format(owner=owner, repo=repo)
     redis_client.set(key, json.dumps(redis_value))
 
