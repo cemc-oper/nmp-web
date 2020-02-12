@@ -138,3 +138,9 @@ server {
 ```
 
 Add SSL for nmp_web.
+
+## License
+
+Copyright &copy; 2015-2019, Perilla Roc
+
+`nmp-web` is licensed under [GPL v3.0](./LICENSE.md)
