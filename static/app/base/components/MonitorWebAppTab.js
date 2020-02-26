@@ -24,9 +24,12 @@ export default class MonitorWebAppTab extends Component{
         });
 
         return (
-            <div className="weui-tabbar">
-                { links }
-            </div>
+          <div>
+            {/*<div className="weui-tabbar">*/}
+            {/*    { links }*/}
+            {/*</div>*/}
+            <p>Copyright &copy; 2020, perillaroc. <a href="http://www.beian.miit.gov.cn">京ICP备16033827号-1</a></p>
+          </div>
         );
     }
 }
